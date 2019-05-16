@@ -62,10 +62,9 @@ void loop()
   if (millis() - _millis >= 50)
   {
     POS_refresh();
-    
-    //
+
     dp.displayXYP(x,y,p);
-    //dp.displayTime(millis());
+
 #ifdef DATA_OUTPUT
     Serial.print("x:");
     Serial.print(x);
@@ -165,7 +164,6 @@ void POS_refresh()
   p = p / PI * 180;
 
 #ifdef POS_DEBUG
-
   Serial.print("_x:");
   Serial.print(_x);
   Serial.print("_y:");
@@ -178,4 +176,16 @@ void POS_refresh()
 
   Serial.println();
 #endif
+}
+
+void SerialEvent()
+{
+  if(Serial.available()>0)
+  {
+    String str = Serial.readStringUntil('\n');
+    str.toLowerCase();
+
+    if(str == "clear"){GY25.correctYaw();}
+    if(str == "clearall"){GY25.correctYaw();x2 = 0;y2 = 0;}
+  }
 }
