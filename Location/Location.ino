@@ -156,8 +156,8 @@ void POS_refresh()
   p = GY25.YPR[0] / 180.00 * PI;
 
   //刘展鹏的算法
-  x2 += _x * cos(p) + (-_y) * sin(p);
-  y2 += (-_y) * cos(p) - _x * sin(p);
+  x2 += _x * cos(p+45) + (-_y) * sin(p+45);
+  y2 += (-_y) * cos(p+45) - _x * sin(p+45);
 
   x = x2;
   y = -y2;
