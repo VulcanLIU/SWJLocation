@@ -16,10 +16,10 @@ long int x_step_total = 0;
 long int y_step_total = 0;
 
 //接线信息
-static const int INT0A = 2;//INT0
-static const int INT0B = 7;
-static const int INT1A = 3;//INT1
-static const int INT1B = 8;
+static const int INT0A = 3;//INT0
+static const int INT0B = 8;
+static const int INT1A = 2;//INT1
+static const int INT1B = 7;
 
 //物理信息
 const double wheel_d = 38;//轮直径38mm
@@ -58,7 +58,7 @@ void loop()
 {
   
   GY25.refresh();
-  
+
   if (millis() - _millis >= 50)
   {
     POS_refresh();
@@ -141,26 +141,22 @@ void POS_clear()
 
 void POS_refresh()
 {
-#ifdef POS_DEBUG
-  double _x1 = 222 * 1.16 / x_line;
-  double _y1 = 1324 * 1.16 / y_line;
-#endif
 
   //统计刷新时间内 编码器位移值
-  _x = double(x_step * 1.16 / x_line) * PI * wheel_d;
+  _x = double(x_step)/ x_line * PI * wheel_d;
   //x_step_total += x_step;
   x_step = 0;//行走的距离 单位mm；
-  _y = double(y_step * 1.16 / y_line) * PI * wheel_d; //行走的距离 单位mm；
+  _y = double(y_step)/ y_line * PI * wheel_d; //行走的距离 单位mm；
   //y_step_total += y_step;
   y_step = 0;
   p = GY25.YPR[0] / 180.00 * PI;
-
+  
   //刘展鹏的算法
-  x2 += _x * cos(p+45) + (-_y) * sin(p+45);
-  y2 += (-_y) * cos(p+45) - _x * sin(p+45);
+  x2 += (-_x) * cos(p) + (_y) * sin(p);
+  y2 += (_y) * cos(p) - (-_x) * sin(p);
 
   x = x2;
-  y = -y2;
+  y = y2;
   p = p / PI * 180;
 
 #ifdef POS_DEBUG
@@ -169,23 +165,30 @@ void POS_refresh()
   Serial.print("_y:");
   Serial.print(_y);
 
-  Serial.print("_x1:");
-  Serial.print(_x1);
-  Serial.print("_y1:");
-  Serial.print(_y1);
-
   Serial.println();
 #endif
 }
 
-void SerialEvent()
+void serialEvent()
 {
   if(Serial.available()>0)
   {
+    //x2 = 0;
     String str = Serial.readStringUntil('\n');
     str.toLowerCase();
-
-    if(str == "clear"){GY25.correctYaw();}
-    if(str == "clearall"){GY25.correctYaw();x2 = 0;y2 = 0;}
+    str = str.substring(0,str.length()-1);
+    Serial.println(str);
+    Serial.println(str.length());
+    
+    if(str == "clear"){GY25.correctYaw();delay(3000);GY25.autoMode();}
+    else
+    {
+      Serial.println("1");
+    }
+    if(str == "clearall"){GY25.correctYaw();delay(3000);GY25.autoMode();x2 = 0;y2 = 0;}
+    else
+    {
+      Serial.println("2");
+    }
   }
 }
